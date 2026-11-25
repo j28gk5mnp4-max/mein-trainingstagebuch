@@ -46,7 +46,11 @@
 
   <button type="button" id="speichern">Eintrag speichern</button>
 </section>
-    </main>
+           <section class="karte">
+          <h2>Gespeicherte Gewichtseinträge</h2>
+          <ul id="gewichtsliste"></ul>
+        </section> 
+  </main>
 
     <script>
       const datum = document.getElementById("datum");
@@ -56,7 +60,20 @@
       
        const gewicht = document.getElementById("gewicht");
       const speichern = document.getElementById("speichern");
+const gewichtsliste = document.getElementById("gewichtsliste");
 
+function eintraegeAnzeigen() {
+  const eintraege = JSON.parse(localStorage.getItem("gewichtseintraege") || "[]");
+  gewichtsliste.innerHTML = "";
+
+  eintraege.slice().reverse().forEach(function(eintrag) {
+    const li = document.createElement("li");
+    li.textContent = new Date(eintrag.datum + "T00:00:00").toLocaleDateString("de-DE") + " - " + eintrag.gewicht.toFixed(1) + " kg";
+    gewichtsliste.appendChild(li);
+  });
+}
+
+eintraegeAnzeigen();
       speichern.addEventListener("click", function () {
         const wert = Number(gewicht.value.replace(",", "."));
 
@@ -68,7 +85,7 @@
         const eintraege = JSON.parse(localStorage.getItem("gewichtseintraege") || "[]");
         eintraege.push({ datum: datum.value, gewicht: wert });
         localStorage.setItem("gewichtseintraege", JSON.stringify(eintraege));
-
+eintraegeAnzeigen();
         alert("Gewichtseintrag wurde auf diesem Gerät gespeichert.");
         gewicht.value = "";
       });</script>
