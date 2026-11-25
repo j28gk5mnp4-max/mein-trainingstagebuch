@@ -50,6 +50,10 @@
           <h2>Gespeicherte Gewichtseinträge</h2>
           <ul id="gewichtsliste"></ul>
         </section> 
+         <section class="karte">
+          <h2>Wochendurchschnitt</h2>
+          <p id="wochendurchschnitt">Wird berechnet ...</p>
+        </section>
   </main>
 
     <script>
@@ -61,7 +65,7 @@
        const gewicht = document.getElementById("gewicht");
       const speichern = document.getElementById("speichern");
 const gewichtsliste = document.getElementById("gewichtsliste");
-
+const wochendurchschnitt = document.getElementById("wochendurchschnitt");
 function eintraegeAnzeigen() {
   const eintraege = JSON.parse(localStorage.getItem("gewichtseintraege") || "[]");
   gewichtsliste.innerHTML = "";
@@ -72,8 +76,41 @@ function eintraegeAnzeigen() {
     gewichtsliste.appendChild(li);
   });
 }
+function wochenDurchschnittBerechnen() {
+  const eintraege = JSON.parse(localStorage.getItem("gewichtseintraege") || "[]");
+  const heute = new Date();
+  const tageSeitMontag = (heute.getDay() + 6) % 7;
+  const montag = new Date(heute);
+  montag.setDate(heute.getDate() - tageSeitMontag);
+  montag.setHours(0, 0, 0, 0);
 
+  const naechsterMontag = new Date(montag);
+  naechsterMontag.setDate(montag.getDate() + 7);
+
+  const tage = {};
+  eintraege.forEach(function(eintrag) {
+    const eintragsDatum = new Date(eintrag.datum + "T00:00:00");
+    if (eintragsDatum >= montag && eintragsDatum < naechsterMontag) {
+      tage[eintrag.datum] = eintrag.gewicht;
+    }
+  });
+
+  const gewichte = Object.values(tage);
+  if (gewichte.length === 0) {
+    wochendurchschnitt.textContent = "Diese Woche noch keine Einträge.";
+    return;
+  }
+
+  const summe = gewichte.reduce(function(gesamt, gewicht) {
+    return gesamt + gewicht;
+  }, 0);
+
+  const durchschnitt = (summe / gewichte.length).toFixed(1).replace(".", ",");
+  const wort = gewichte.length === 1 ? "Wiegetag" : "Wiegetage";
+  wochendurchschnitt.textContent = "Ø " + durchschnitt + " kg aus " + gewichte.length + " " + wort;
+}
 eintraegeAnzeigen();
+      wochenDurchschnittBerechnen();
       speichern.addEventListener("click", function () {
         const wert = Number(gewicht.value.replace(",", "."));
 
@@ -86,6 +123,7 @@ eintraegeAnzeigen();
         eintraege.push({ datum: datum.value, gewicht: wert });
         localStorage.setItem("gewichtseintraege", JSON.stringify(eintraege));
 eintraegeAnzeigen();
+        wochenDurchschnittBerechnen();
         alert("Gewichtseintrag wurde auf diesem Gerät gespeichert.");
         gewicht.value = "";
       });</script>
