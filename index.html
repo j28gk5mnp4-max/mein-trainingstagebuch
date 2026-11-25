@@ -46,3 +46,13 @@
 
   <button type="button">Eintrag speichern</button>
 </section>
+    </main>
+
+    <script>
+      const datum = document.getElementById("datum");
+      const jetzt = new Date();
+      jetzt.setMinutes(jetzt.getMinutes() - jetzt.getTimezoneOffset());
+      datum.value = jetzt.toISOString().slice(0, 10);
+    </script>
+  </body>
+</html>
