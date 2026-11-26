@@ -101,14 +101,14 @@ const weitereUebungen = document.getElementById("weitere-uebungen");
 const uebungHinzufuegen = document.getElementById("uebung-hinzufuegen");
 const trainingSpeichern = document.getElementById("training-speichern");
 const trainingliste = document.getElementById("trainingliste");
-  function saetzeAnzeigen(saetze, liste, gesamt, uebung) {
-  liste.replaceChildren();
-
+ function saetzeAnzeigen(saetze, liste, gesamt, uebung, einheitText) {
+  const einheitAnzeige = einheitText || "Wiederholungen";
+liste.replaceChildren();
   saetze.forEach(function (wert, index) {
     const zeile = document.createElement("span");
     const text = document.createElement("span");
     text.textContent =
-      "Satz " + (index + 1) + ": " + wert + " Wiederholungen ";
+   "Satz " + (index + 1) + ": " + wert + " " + einheitAnzeige + " ";
 
     const aendern = document.createElement("button");
     aendern.type = "button";
@@ -134,7 +134,7 @@ const trainingliste = document.getElementById("trainingliste");
         }
 
         saetze[index] = neuerWert;
-        saetzeAnzeigen(saetze, liste, gesamt, uebung);
+       saetzeAnzeigen(saetze, liste, gesamt, uebung, einheitAnzeige);
       });
 
       zeile.replaceChildren(eingabe, uebernehmen);
@@ -151,7 +151,7 @@ const trainingliste = document.getElementById("trainingliste");
   }, 0);
 
   gesamt.textContent =
-    "Tagessumme " + uebung + ": " + summe + " Wiederholungen";
+  "Tagessumme " + uebung + ": " + summe + " " + einheitAnzeige;
 }
   liegestuetzeBestaetigen.addEventListener("click", function () {
   const wert = Number(liegestuetzeWiederholungen.value);
@@ -191,14 +191,14 @@ block.innerHTML = `
 </select>
 <button type="button" class="uebung-bestaetigen">Satz bestätigen</button>
 <p class="uebung-satzliste">Noch kein Satz bestätigt.</p>
-`;
+<p class="uebung-gesamt">Tagessumme: 0</p>`;
 block.uebungsWerte = [];
 
 const wertInput = block.querySelector(".uebung-wert");
 const einheit = block.querySelector(".uebung-einheit");
 const bestaetigen = block.querySelector(".uebung-bestaetigen");
 const satzliste = block.querySelector(".uebung-satzliste");
-
+const gesamt = block.querySelector(".uebung-gesamt");
 bestaetigen.addEventListener("click", function () {
   const wert = Number(wertInput.value);
   if (!Number.isInteger(wert) || wert <= 0) {
@@ -207,9 +207,13 @@ bestaetigen.addEventListener("click", function () {
   }
 
   block.uebungsWerte.push(wert);
-  satzliste.textContent =
-    "Sätze bestätigt: " + block.uebungsWerte.length +
-    " (" + block.uebungsWerte.join(", ") + " " + einheit.value + ")";
+  saetzeAnzeigen(
+  block.uebungsWerte,
+  satzliste,
+  gesamt,
+  block.querySelector(".uebung-name").value || "Eigene Übung",
+  einheit.value
+);
   wertInput.value = "";
 });
 
