@@ -300,7 +300,14 @@ if (kniebeugenSaetze.length > 0) {
     einheit: "Wiederholungen"
   });
 }
-
+if (unterarmplankSaetze.length > 0) {
+  uebungen.push({
+    name: "Unterarmplank",
+    saetze: unterarmplankSaetze.length,
+    werte: unterarmplankSaetze.slice(),
+    einheit: "Sekunden"
+  });
+}
 document.querySelectorAll(".eigene-uebung").forEach(function (block) {
   const name = block.querySelector(".uebung-name").value.trim();
   const wertInput = block.querySelector(".uebung-wert").value;
@@ -345,6 +352,12 @@ liegestuetzeSatzliste.textContent = "Noch kein Satz bestätigt.";
 kniebeugenSaetze.length = 0;
 kniebeugenWiederholungen.value = "";
 kniebeugenSatzliste.textContent = "Noch kein Satz bestätigt.";
+  liegestuetzeGesamt.textContent = "Tagessumme: 0 Wiederholungen";
+knieBeugenGesamt.textContent = "Tagessumme: 0 Wiederholungen";
+unterarmplankSaetze.length = 0;
+unterarmplankSekunden.value = "";
+unterarmplankSatzliste.textContent = "Noch kein Satz bestätigt.";
+unterarmplankGesamt.textContent = "Tagessumme: 0 Sekunden";
 document.querySelectorAll(".eigene-uebung").forEach(function (block) {
 block.remove();
 });
