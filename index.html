@@ -51,16 +51,16 @@ box-shadow: 0 4px 14px #00000012;
 <p>Das Datum oben gilt auch für dieses Training.</p>
 
 <h3>Liegestütze</h3>
-<label for="liegestuetze-saetze">Sätze</label>
-<input type="number" id="liegestuetze-saetze" min="0" step="1">
-<label for="liegestuetze-wiederholungen">Wiederholungen pro Satz</label>
-<input type="number" id="liegestuetze-wiederholungen" min="0" step="1">
+<label for="liegestuetze-wiederholungen">Wiederholungen in diesem Satz</label>
+<input type="number" id="liegestuetze-wiederholungen" min="1" step="1">
+<button type="button" id="liegestuetze-bestaetigen">Satz bestätigen</button>
+<p id="liegestuetze-satzliste">Noch kein Satz bestätigt.</p>
 
 <h3>Kniebeugen</h3>
-<label for="kniebeugen-saetze">Sätze</label>
-<input type="number" id="kniebeugen-saetze" min="0" step="1">
-<label for="kniebeugen-wiederholungen">Wiederholungen pro Satz</label>
-<input type="number" id="kniebeugen-wiederholungen" min="0" step="1">
+<label for="kniebeugen-wiederholungen">Wiederholungen in diesem Satz</label>
+<input type="number" id="kniebeugen-wiederholungen" min="1" step="1">
+<button type="button" id="kniebeugen-bestaetigen">Satz bestätigen</button>
+<p id="kniebeugen-satzliste">Noch kein Satz bestätigt.</p>
 
 <div id="weitere-uebungen"></div>
 <button type="button" id="uebung-hinzufuegen">+ Eigene Übung hinzufügen</button>
@@ -87,14 +87,43 @@ const gewicht = document.getElementById("gewicht");
 const speichern = document.getElementById("speichern");
 const gewichtsliste = document.getElementById("gewichtsliste");
 const wochendurchschnitt = document.getElementById("wochendurchschnitt");
-const liegestuetzeSaetze = document.getElementById("liegestuetze-saetze");
 const liegestuetzeWiederholungen = document.getElementById("liegestuetze-wiederholungen");
-const kniebeugenSaetze = document.getElementById("kniebeugen-saetze");
+const liegestuetzeBestaetigen = document.getElementById("liegestuetze-bestaetigen");
+const liegestuetzeSatzliste = document.getElementById("liegestuetze-satzliste");
 const kniebeugenWiederholungen = document.getElementById("kniebeugen-wiederholungen");
+const kniebeugenBestaetigen = document.getElementById("kniebeugen-bestaetigen");
+const kniebeugenSatzliste = document.getElementById("kniebeugen-satzliste");
+const liegestuetzeSaetze = [];
+const kniebeugenSaetze = [];
 const weitereUebungen = document.getElementById("weitere-uebungen");
 const uebungHinzufuegen = document.getElementById("uebung-hinzufuegen");
 const trainingSpeichern = document.getElementById("training-speichern");
 const trainingliste = document.getElementById("trainingliste");
+  liegestuetzeBestaetigen.addEventListener("click", function () {
+  const wert = Number(liegestuetzeWiederholungen.value);
+  if (!Number.isInteger(wert) || wert <= 0) {
+    alert("Bitte gib eine gültige Anzahl Wiederholungen ein.");
+    return;
+  }
+  liegestuetzeSaetze.push(wert);
+  liegestuetzeSatzliste.textContent =
+    "Sätze bestätigt: " + liegestuetzeSaetze.length +
+    " (" + liegestuetzeSaetze.join(", ") + " Wiederholungen)";
+  liegestuetzeWiederholungen.value = "";
+});
+
+kniebeugenBestaetigen.addEventListener("click", function () {
+  const wert = Number(kniebeugenWiederholungen.value);
+  if (!Number.isInteger(wert) || wert <= 0) {
+    alert("Bitte gib eine gültige Anzahl Wiederholungen ein.");
+    return;
+  }
+  kniebeugenSaetze.push(wert);
+  kniebeugenSatzliste.textContent =
+    "Sätze bestätigt: " + kniebeugenSaetze.length +
+    " (" + kniebeugenSaetze.join(", ") + " Wiederholungen)";
+  knieBeugenWiederholungen.value = "";
+});
 uebungHinzufuegen.addEventListener("click", function () {
 const block = document.createElement("div");
 block.className = "eigene-uebung";
@@ -103,15 +132,36 @@ block.innerHTML = `
 <h3>Eigene Übung</h3>
 <label>Übung</label>
 <input type="text" class="uebung-name" placeholder="z. B. Unterarmplank">
-<label>Sätze</label>
-<input type="number" class="uebung-saetze" min="1" step="1">
-<label>Wert pro Satz</label>
+<label>Wert für diesen Satz</label>
 <input type="number" class="uebung-wert" min="1" step="1">
+<label>Einheit</label>
 <select class="uebung-einheit">
 <option value="Wiederholungen">Wiederholungen</option>
 <option value="Sekunden">Sekunden</option>
 </select>
+<button type="button" class="uebung-bestaetigen">Satz bestätigen</button>
+<p class="uebung-satzliste">Noch kein Satz bestätigt.</p>
 `;
+block.uebungsWerte = [];
+
+const wertInput = block.querySelector(".uebung-wert");
+const einheit = block.querySelector(".uebung-einheit");
+const bestaetigen = block.querySelector(".uebung-bestaetigen");
+const satzliste = block.querySelector(".uebung-satzliste");
+
+bestaetigen.addEventListener("click", function () {
+  const wert = Number(wertInput.value);
+  if (!Number.isInteger(wert) || wert <= 0) {
+    alert("Bitte gib einen gültigen Wert ein.");
+    return;
+  }
+
+  block.uebungsWerte.push(wert);
+  satzliste.textContent =
+    "Sätze bestätigt: " + block.uebungsWerte.length +
+    " (" + block.uebungsWerte.join(", ") + " " + einheit.value + ")";
+  wertInput.value = "";
+});
 
 weitereUebungen.appendChild(block);
 });
@@ -122,7 +172,12 @@ trainingliste.innerHTML = "";
 trainingEintraege.slice().reverse().forEach(function(eintrag) {
 const li = document.createElement("li");
 const uebungenText = eintrag.uebungen.map(function(uebung) {
-return uebung.name + ": " + uebung.saetze + " Sätze x " + uebung.wert + " " + uebung.einheit + " je Satz";
+const satzText = Array.isArray(uebung.werte)
+  ? uebung.werte.map(function (wert, index) {
+      return (index + 1) + ". Satz: " + wert + " " + uebung.einheit;
+    }).join(", ")
+  : uebung.saetze + " Sätze x " + uebung.wert + " " + uebung.einheit;
+return uebung.name + ": " + satzText;
 }).join("; ");
 
 li.textContent = new Date(eintrag.datum + "T00:00:00").toLocaleDateString("de-DE") + " - " + uebungenText;
@@ -135,58 +190,43 @@ trainingSpeichern.addEventListener("click", function () {
 const uebungen = [];
 let fehler = false;
 
-const liegeSaetze = liegestuetzeSaetze.value;
-const liegeWiederholungen = liegestuetzeWiederholungen.value;
-
-if (liegeSaetze !== "" || liegeWiederholungen !== "") {
-if (!liegeSaetze || !liegeWiederholungen || Number(liegeSaetze) <= 0 || Number(liegeWiederholungen) <= 0) {
-fehler = true;
-} else {
-uebungen.push({
-name: "Liegestütze",
-saetze: Number(liegeSaetze),
-wert: Number(liegeWiederholungen),
-einheit: "Wiederholungen"
-});
-}
+if (liegestuetzeSaetze.length > 0) {
+  uebungen.push({
+    name: "Liegestütze",
+    saetze: liegestuetzeSaetze.length,
+    werte: liegestuetzeSaetze.slice(),
+    einheit: "Wiederholungen"
+  });
 }
 
-const knieSaetze = knieBeugenSaetze.value;
-const knieWiederholungen = knieBeugenWiederholungen.value;
-
-if (knieSaetze !== "" || knieWiederholungen !== "") {
-if (!knieSaetze || !knieWiederholungen || Number(knieSaetze) <= 0 || Number(knieWiederholungen) <= 0) {
-fehler = true;
-} else {
-uebungen.push({
-name: "Kniebeugen",
-saetze: Number(knieSaetze),
-wert: Number(knieWiederholungen),
-einheit: "Wiederholungen"
-});
-}
+if (kniebeugenSaetze.length > 0) {
+  uebungen.push({
+    name: "Kniebeugen",
+    saetze: kniebeugenSaetze.length,
+    werte: kniebeugenSaetze.slice(),
+    einheit: "Wiederholungen"
+  });
 }
 
 document.querySelectorAll(".eigene-uebung").forEach(function (block) {
-const name = block.querySelector(".uebung-name").value.trim();
-const saetze = block.querySelector(".uebung-saetze").value;
-const wert = block.querySelector(".uebung-wert").value;
-const einheit = block.querySelector(".uebung-einheit").value;
+  const name = block.querySelector(".uebung-name").value.trim();
+  const wertInput = block.querySelector(".uebung-wert").value;
+  const einheit = block.querySelector(".uebung-einheit").value;
+  const werte = block.uebungsWerte || [];
 
-if (name || saetze || wert) {
-if (!name || !saetze || !wert || Number(saetze) <= 0 || Number(wert) <= 0) {
-fehler = true;
-} else {
-uebungen.push({
-name: name,
-saetze: Number(saetze),
-wert: Number(wert),
-einheit: einheit
+  if (name || wertInput !== "" || werte.length > 0) {
+    if (!name || werte.length === 0 || wertInput !== "") {
+      fehler = true;
+    } else {
+      uebungen.push({
+        name: name,
+        saetze: werte.length,
+        werte: werte.slice(),
+        einheit: einheit
+      });
+    }
+  }
 });
-}
-}
-});
-
 if (fehler) {
 alert("Bitte fülle bei jeder begonnenen Übung alle Felder mit gültigen Werten aus.");
 return;
@@ -206,10 +246,12 @@ localStorage.setItem("trainingseintraege", JSON.stringify(gespeicherteTrainings)
 
 trainingEintraegeAnzeigen();
 
-liegestuetzeSaetze.value = "";
+liegestuetzeSaetze.length = 0;
 liegestuetzeWiederholungen.value = "";
-knieBeugenSaetze.value = "";
-knieBeugenWiederholungen.value = "";
+liegestuetzeSatzliste.textContent = "Noch kein Satz bestätigt.";
+kniebeugenSaetze.length = 0;
+kniebeugenWiederholungen.value = "";
+kniebeugenSatzliste.textContent = "Noch kein Satz bestätigt.";
 document.querySelectorAll(".eigene-uebung").forEach(function (block) {
 block.remove();
 });
