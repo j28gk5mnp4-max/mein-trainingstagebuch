@@ -55,13 +55,13 @@ box-shadow: 0 4px 14px #00000012;
 <input type="number" id="liegestuetze-wiederholungen" min="1" step="1">
 <button type="button" id="liegestuetze-bestaetigen">Satz bestätigen</button>
 <p id="liegestuetze-satzliste">Noch kein Satz bestätigt.</p>
-
+<p id="liegestuetze-gesamt">Tagessumme: 0 Wiederholungen</p>
 <h3>Kniebeugen</h3>
 <label for="kniebeugen-wiederholungen">Wiederholungen in diesem Satz</label>
 <input type="number" id="kniebeugen-wiederholungen" min="1" step="1">
 <button type="button" id="kniebeugen-bestaetigen">Satz bestätigen</button>
 <p id="kniebeugen-satzliste">Noch kein Satz bestätigt.</p>
-
+<p id="kniebeugen-gesamt">Tagessumme: 0 Wiederholungen</p>
 <div id="weitere-uebungen"></div>
 <button type="button" id="uebung-hinzufuegen">+ Eigene Übung hinzufügen</button>
 <button type="button" id="training-speichern">Training speichern</button>
@@ -90,15 +90,69 @@ const wochendurchschnitt = document.getElementById("wochendurchschnitt");
 const liegestuetzeWiederholungen = document.getElementById("liegestuetze-wiederholungen");
 const liegestuetzeBestaetigen = document.getElementById("liegestuetze-bestaetigen");
 const liegestuetzeSatzliste = document.getElementById("liegestuetze-satzliste");
+  const liegestuetzeGesamt = document.getElementById("liegestuetze-gesamt");
 const kniebeugenWiederholungen = document.getElementById("kniebeugen-wiederholungen");
 const kniebeugenBestaetigen = document.getElementById("kniebeugen-bestaetigen");
 const kniebeugenSatzliste = document.getElementById("kniebeugen-satzliste");
+  const knieBeugenGesamt = document.getElementById("kniebeugen-gesamt");
 const liegestuetzeSaetze = [];
 const kniebeugenSaetze = [];
 const weitereUebungen = document.getElementById("weitere-uebungen");
 const uebungHinzufuegen = document.getElementById("uebung-hinzufuegen");
 const trainingSpeichern = document.getElementById("training-speichern");
 const trainingliste = document.getElementById("trainingliste");
+  function saetzeAnzeigen(saetze, liste, gesamt, uebung) {
+  liste.replaceChildren();
+
+  saetze.forEach(function (wert, index) {
+    const zeile = document.createElement("span");
+    const text = document.createElement("span");
+    text.textContent =
+      "Satz " + (index + 1) + ": " + wert + " Wiederholungen ";
+
+    const aendern = document.createElement("button");
+    aendern.type = "button";
+    aendern.textContent = "Ändern";
+
+    aendern.addEventListener("click", function () {
+      const eingabe = document.createElement("input");
+      eingabe.type = "number";
+      eingabe.min = "1";
+      eingabe.step = "1";
+      eingabe.value = wert;
+
+      const uebernehmen = document.createElement("button");
+      uebernehmen.type = "button";
+      uebernehmen.textContent = "Übernehmen";
+
+      uebernehmen.addEventListener("click", function () {
+        const neuerWert = Number(eingabe.value);
+
+        if (!Number.isInteger(neuerWert) || neuerWert <= 0) {
+          alert("Bitte gib eine gültige Anzahl Wiederholungen ein.");
+          return;
+        }
+
+        saetze[index] = neuerWert;
+        saetzeAnzeigen(saetze, liste, gesamt, uebung);
+      });
+
+      zeile.replaceChildren(eingabe, uebernehmen);
+      eingabe.focus();
+    });
+
+    zeile.append(text, aendern);
+    liste.appendChild(zeile);
+    liste.appendChild(document.createElement("br"));
+  });
+
+  const summe = saetze.reduce(function (gesamtwert, wert) {
+    return gesamtwert + wert;
+  }, 0);
+
+  gesamt.textContent =
+    "Tagessumme " + uebung + ": " + summe + " Wiederholungen";
+}
   liegestuetzeBestaetigen.addEventListener("click", function () {
   const wert = Number(liegestuetzeWiederholungen.value);
   if (!Number.isInteger(wert) || wert <= 0) {
@@ -106,9 +160,7 @@ const trainingliste = document.getElementById("trainingliste");
     return;
   }
   liegestuetzeSaetze.push(wert);
-  liegestuetzeSatzliste.textContent =
-    "Sätze bestätigt: " + liegestuetzeSaetze.length +
-    " (" + liegestuetzeSaetze.join(", ") + " Wiederholungen)";
+  saetzeAnzeigen(liegestuetzeSaetze, liegestuetzeSatzliste, liegestuetzeGesamt, "Liegestütze");
   liegestuetzeWiederholungen.value = "";
 });
 
@@ -119,9 +171,7 @@ kniebeugenBestaetigen.addEventListener("click", function () {
     return;
   }
   kniebeugenSaetze.push(wert);
-  kniebeugenSatzliste.textContent =
-    "Sätze bestätigt: " + kniebeugenSaetze.length +
-    " (" + kniebeugenSaetze.join(", ") + " Wiederholungen)";
+  saetzeAnzeigen(kniebeugenSaetze, knieBeugenSatzliste, knieBeugenGesamt, "Kniebeugen");
   knieBeugenWiederholungen.value = "";
 });
 uebungHinzufuegen.addEventListener("click", function () {
