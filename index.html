@@ -1,131 +1,284 @@
+Github Code
+
+
 <!doctype html>
 <html lang="de">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mein Trainingstagebuch</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f1f5f9;
-      color: #1e293b;
-      margin: 0;
-      padding: 24px;
-    }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mein Trainingstagebuch</title>
+<style>
+body {
+font-family: Arial, sans-serif;
+background: #f1f5f9;
+color: #1e293b;
+margin: 0;
+padding: 24px;
+}
 
-    main {
-      max-width: 700px;
-      margin: 0 auto;
-    }
+main {
+max-width: 700px;
+margin: 0 auto;
+}
 
-    h1 {
-      color: #155e75;
-    }
+h1 {
+color: #155e75;
+}
 
-    .karte {
-      background: white;
-      padding: 20px;
-      border-radius: 16px;
-      box-shadow: 0 4px 14px #00000012;
-    }
-  </style>
+.karte {
+background: white;
+padding: 20px;
+border-radius: 16px;
+box-shadow: 0 4px 14px #00000012;
+}
+</style>
 </head>
 <body>
-  <main>
-    <h1>Mein Trainingstagebuch</h1>
-    <p>Dein persönlicher Überblick über Training und Gewicht.</p>
+<main>
+<h1>Mein Trainingstagebuch</h1>
+<p>Dein persönlicher Überblick über Training und Gewicht.</p>
 
-    <section class="karte">
-  <h2>Eintrag hinzufügen</h2>
+<section class="karte">
+<h2>Eintrag hinzufügen</h2>
 
-  <label for="datum">Datum</label>
-  <input type="date" id="datum">
+<label for="datum">Datum</label>
+<input type="date" id="datum">
 
-  <label for="gewicht">Gewicht in kg</label>
-  <input type="number" id="gewicht" step="0.1" placeholder="Zum Beispiel 87,5">
+<label for="gewicht">Gewicht in kg</label>
+<input type="number" id="gewicht" step="0.1" placeholder="Zum Beispiel 87,5">
 
-  <button type="button" id="speichern">Eintrag speichern</button>
+<button type="button" id="speichern">Eintrag speichern</button>
 </section>
-           <section class="karte">
-          <h2>Gespeicherte Gewichtseinträge</h2>
-          <ul id="gewichtsliste"></ul>
-        </section> 
-         <section class="karte">
-          <h2>Wochendurchschnitt</h2>
-          <p id="wochendurchschnitt">Wird berechnet ...</p>
-        </section>
-  </main>
+<section class="karte">
+<h2>Training für heute</h2>
+<p>Das Datum oben gilt auch für dieses Training.</p>
 
-    <script>
-      const datum = document.getElementById("datum");
-      const jetzt = new Date();
-      jetzt.setMinutes(jetzt.getMinutes() - jetzt.getTimezoneOffset());
-      datum.value = jetzt.toISOString().slice(0, 10);
-      
-       const gewicht = document.getElementById("gewicht");
-      const speichern = document.getElementById("speichern");
+<h3>Liegestütze</h3>
+<label for="liegestuetze-saetze">Sätze</label>
+<input type="number" id="liegestuetze-saetze" min="0" step="1">
+<label for="liegestuetze-wiederholungen">Wiederholungen pro Satz</label>
+<input type="number" id="liegestuetze-wiederholungen" min="0" step="1">
+
+<h3>Kniebeugen</h3>
+<label for="kniebeugen-saetze">Sätze</label>
+<input type="number" id="kniebeugen-saetze" min="0" step="1">
+<label for="kniebeugen-wiederholungen">Wiederholungen pro Satz</label>
+<input type="number" id="kniebeugen-wiederholungen" min="0" step="1">
+
+<div id="weitere-uebungen"></div>
+<button type="button" id="uebung-hinzufuegen">+ Eigene Übung hinzufügen</button>
+<button type="button" id="training-speichern">Training speichern</button>
+<ul id="trainingliste"></ul>
+</section>
+<section class="karte">
+<h2>Gespeicherte Gewichtseinträge</h2>
+<ul id="gewichtsliste"></ul>
+</section>
+<section class="karte">
+<h2>Wochendurchschnitt</h2>
+<p id="wochendurchschnitt">Wird berechnet ...</p>
+</section>
+</main>
+
+<script>
+const datum = document.getElementById("datum");
+const jetzt = new Date();
+jetzt.setMinutes(jetzt.getMinutes() - jetzt.getTimezoneOffset());
+datum.value = jetzt.toISOString().slice(0, 10);
+
+const gewicht = document.getElementById("gewicht");
+const speichern = document.getElementById("speichern");
 const gewichtsliste = document.getElementById("gewichtsliste");
 const wochendurchschnitt = document.getElementById("wochendurchschnitt");
-function eintraegeAnzeigen() {
-  const eintraege = JSON.parse(localStorage.getItem("gewichtseintraege") || "[]");
-  gewichtsliste.innerHTML = "";
+const liegestuetzeSaetze = document.getElementById("liegestuetze-saetze");
+const liegestuetzeWiederholungen = document.getElementById("liegestuetze-wiederholungen");
+const kniebeugenSaetze = document.getElementById("kniebeugen-saetze");
+const kniebeugenWiederholungen = document.getElementById("kniebeugen-wiederholungen");
+const weitereUebungen = document.getElementById("weitere-uebungen");
+const uebungHinzufuegen = document.getElementById("uebung-hinzufuegen");
+const trainingSpeichern = document.getElementById("training-speichern");
+const trainingliste = document.getElementById("trainingliste");
+uebungHinzufuegen.addEventListener("click", function () {
+const block = document.createElement("div");
+block.className = "eigene-uebung";
 
-  eintraege.slice().reverse().forEach(function(eintrag) {
-    const li = document.createElement("li");
-    li.textContent = new Date(eintrag.datum + "T00:00:00").toLocaleDateString("de-DE") + " - " + eintrag.gewicht.toFixed(1) + " kg";
-    gewichtsliste.appendChild(li);
-  });
+block.innerHTML = `
+<h3>Eigene Übung</h3>
+<label>Übung</label>
+<input type="text" class="uebung-name" placeholder="z. B. Unterarmplank">
+<label>Sätze</label>
+<input type="number" class="uebung-saetze" min="1" step="1">
+<label>Wert pro Satz</label>
+<input type="number" class="uebung-wert" min="1" step="1">
+<select class="uebung-einheit">
+<option value="Wiederholungen">Wiederholungen</option>
+<option value="Sekunden">Sekunden</option>
+</select>
+`;
+
+weitereUebungen.appendChild(block);
+});
+function trainingEintraegeAnzeigen() {
+const trainingEintraege = JSON.parse(localStorage.getItem("trainingseintraege") || "[]");
+trainingliste.innerHTML = "";
+
+trainingEintraege.slice().reverse().forEach(function(eintrag) {
+const li = document.createElement("li");
+const uebungenText = eintrag.uebungen.map(function(uebung) {
+return uebung.name + ": " + uebung.saetze + " Sätze x " + uebung.wert + " " + uebung.einheit + " je Satz";
+}).join("; ");
+
+li.textContent = new Date(eintrag.datum + "T00:00:00").toLocaleDateString("de-DE") + " - " + uebungenText;
+trainingliste.appendChild(li);
+});
+}
+
+trainingEintraegeAnzeigen();
+trainingSpeichern.addEventListener("click", function () {
+const uebungen = [];
+let fehler = false;
+
+const liegeSaetze = liegestuetzeSaetze.value;
+const liegeWiederholungen = liegestuetzeWiederholungen.value;
+
+if (liegeSaetze !== "" || liegeWiederholungen !== "") {
+if (!liegeSaetze || !liegeWiederholungen || Number(liegeSaetze) <= 0 || Number(liegeWiederholungen) <= 0) {
+fehler = true;
+} else {
+uebungen.push({
+name: "Liegestütze",
+saetze: Number(liegeSaetze),
+wert: Number(liegeWiederholungen),
+einheit: "Wiederholungen"
+});
+}
+}
+
+const knieSaetze = knieBeugenSaetze.value;
+const knieWiederholungen = knieBeugenWiederholungen.value;
+
+if (knieSaetze !== "" || knieWiederholungen !== "") {
+if (!knieSaetze || !knieWiederholungen || Number(knieSaetze) <= 0 || Number(knieWiederholungen) <= 0) {
+fehler = true;
+} else {
+uebungen.push({
+name: "Kniebeugen",
+saetze: Number(knieSaetze),
+wert: Number(knieWiederholungen),
+einheit: "Wiederholungen"
+});
+}
+}
+
+document.querySelectorAll(".eigene-uebung").forEach(function (block) {
+const name = block.querySelector(".uebung-name").value.trim();
+const saetze = block.querySelector(".uebung-saetze").value;
+const wert = block.querySelector(".uebung-wert").value;
+const einheit = block.querySelector(".uebung-einheit").value;
+
+if (name || saetze || wert) {
+if (!name || !saetze || !wert || Number(saetze) <= 0 || Number(wert) <= 0) {
+fehler = true;
+} else {
+uebungen.push({
+name: name,
+saetze: Number(saetze),
+wert: Number(wert),
+einheit: einheit
+});
+}
+}
+});
+
+if (fehler) {
+alert("Bitte fülle bei jeder begonnenen Übung alle Felder mit gültigen Werten aus.");
+return;
+}
+
+if (uebungen.length === 0) {
+alert("Bitte gib mindestens eine Übung ein.");
+return;
+}
+
+const gespeicherteTrainings = JSON.parse(localStorage.getItem("trainingseintraege") || "[]");
+gespeicherteTrainings.push({
+datum: datum.value,
+uebungen: uebungen
+});
+localStorage.setItem("trainingseintraege", JSON.stringify(gespeicherteTrainings));
+
+trainingEintraegeAnzeigen();
+
+liegestuetzeSaetze.value = "";
+liegestuetzeWiederholungen.value = "";
+knieBeugenSaetze.value = "";
+knieBeugenWiederholungen.value = "";
+document.querySelectorAll(".eigene-uebung").forEach(function (block) {
+block.remove();
+});
+
+alert("Training wurde auf diesem Gerät gespeichert.");
+});
+function eintraegeAnzeigen() {
+const eintraege = JSON.parse(localStorage.getItem("gewichtseintraege") || "[]");
+gewichtsliste.innerHTML = "";
+
+eintraege.slice().reverse().forEach(function(eintrag) {
+const li = document.createElement("li");
+li.textContent = new Date(eintrag.datum + "T00:00:00").toLocaleDateString("de-DE") + " - " + eintrag.gewicht.toFixed(1) + " kg";
+gewichtsliste.appendChild(li);
+});
 }
 function wochenDurchschnittBerechnen() {
-  const eintraege = JSON.parse(localStorage.getItem("gewichtseintraege") || "[]");
-  const heute = new Date();
-  const tageSeitMontag = (heute.getDay() + 6) % 7;
-  const montag = new Date(heute);
-  montag.setDate(heute.getDate() - tageSeitMontag);
-  montag.setHours(0, 0, 0, 0);
+const eintraege = JSON.parse(localStorage.getItem("gewichtseintraege") || "[]");
+const heute = new Date();
+const tageSeitMontag = (heute.getDay() + 6) % 7;
+const montag = new Date(heute);
+montag.setDate(heute.getDate() - tageSeitMontag);
+montag.setHours(0, 0, 0, 0);
 
-  const naechsterMontag = new Date(montag);
-  naechsterMontag.setDate(montag.getDate() + 7);
+const naechsterMontag = new Date(montag);
+naechsterMontag.setDate(montag.getDate() + 7);
 
-  const tage = {};
-  eintraege.forEach(function(eintrag) {
-    const eintragsDatum = new Date(eintrag.datum + "T00:00:00");
-    if (eintragsDatum >= montag && eintragsDatum < naechsterMontag) {
-      tage[eintrag.datum] = eintrag.gewicht;
-    }
-  });
+const tage = {};
+eintraege.forEach(function(eintrag) {
+const eintragsDatum = new Date(eintrag.datum + "T00:00:00");
+if (eintragsDatum >= montag && eintragsDatum < naechsterMontag) {
+tage[eintrag.datum] = eintrag.gewicht;
+}
+});
 
-  const gewichte = Object.values(tage);
-  if (gewichte.length === 0) {
-    wochendurchschnitt.textContent = "Diese Woche noch keine Einträge.";
-    return;
-  }
+const gewichte = Object.values(tage);
+if (gewichte.length === 0) {
+wochendurchschnitt.textContent = "Diese Woche noch keine Einträge.";
+return;
+}
 
-  const summe = gewichte.reduce(function(gesamt, gewicht) {
-    return gesamt + gewicht;
-  }, 0);
+const summe = gewichte.reduce(function(gesamt, gewicht) {
+return gesamt + gewicht;
+}, 0);
 
-  const durchschnitt = (summe / gewichte.length).toFixed(1).replace(".", ",");
-  const wort = gewichte.length === 1 ? "Wiegetag" : "Wiegetage";
-  wochendurchschnitt.textContent = "Ø " + durchschnitt + " kg aus " + gewichte.length + " " + wort;
+const durchschnitt = (summe / gewichte.length).toFixed(1).replace(".", ",");
+const wort = gewichte.length === 1 ? "Wiegetag" : "Wiegetage";
+wochendurchschnitt.textContent = "Ø " + durchschnitt + " kg aus " + gewichte.length + " " + wort;
 }
 eintraegeAnzeigen();
-      wochenDurchschnittBerechnen();
-      speichern.addEventListener("click", function () {
-        const wert = Number(gewicht.value.replace(",", "."));
+wochenDurchschnittBerechnen();
+speichern.addEventListener("click", function () {
+const wert = Number(gewicht.value.replace(",", "."));
 
-        if (!datum.value || !gewicht.value || !Number.isFinite(wert) || wert <= 0) {
-          alert("Bitte Datum und ein gültiges Gewicht eingeben.");
-          return;
-        }
+if (!datum.value || !gewicht.value || !Number.isFinite(wert) || wert <= 0) {
+alert("Bitte Datum und ein gültiges Gewicht eingeben.");
+return;
+}
 
-        const eintraege = JSON.parse(localStorage.getItem("gewichtseintraege") || "[]");
-        eintraege.push({ datum: datum.value, gewicht: wert });
-        localStorage.setItem("gewichtseintraege", JSON.stringify(eintraege));
+const eintraege = JSON.parse(localStorage.getItem("gewichtseintraege") || "[]");
+eintraege.push({ datum: datum.value, gewicht: wert });
+localStorage.setItem("gewichtseintraege", JSON.stringify(eintraege));
 eintraegeAnzeigen();
-        wochenDurchschnittBerechnen();
-        alert("Gewichtseintrag wurde auf diesem Gerät gespeichert.");
-        gewicht.value = "";
-      });</script>
-  </body>
+wochenDurchschnittBerechnen();
+alert("Gewichtseintrag wurde auf diesem Gerät gespeichert.");
+gewicht.value = "";
+});</script>
+</body>
 </html>
