@@ -62,7 +62,13 @@ box-shadow: 0 4px 14px #00000012;
 <button type="button" id="kniebeugen-bestaetigen">Satz bestätigen</button>
 <p id="kniebeugen-satzliste">Noch kein Satz bestätigt.</p>
 <p id="kniebeugen-gesamt">Tagessumme: 0 Wiederholungen</p>
-<div id="weitere-uebungen"></div>
+<h3>Unterarmplank</h3>
+<label for="unterarmplank-sekunden">Dauer dieses Satzes (Sekunden)</label>
+<input type="number" id="unterarmplank-sekunden" min="1" step="1">
+<button type="button" id="unterarmplank-bestaetigen">Satz bestätigen</button>
+<p id="unterarmplank-satzliste">Noch kein Satz bestätigt.</p>
+<p id="unterarmplank-gesamt">Tagessumme: 0 Sekunden</p>
+  <div id="weitere-uebungen"></div>
 <button type="button" id="uebung-hinzufuegen">+ Eigene Übung hinzufügen</button>
 <button type="button" id="training-speichern">Training speichern</button>
 <ul id="trainingliste"></ul>
@@ -95,6 +101,11 @@ const kniebeugenWiederholungen = document.getElementById("kniebeugen-wiederholun
 const kniebeugenBestaetigen = document.getElementById("kniebeugen-bestaetigen");
 const kniebeugenSatzliste = document.getElementById("kniebeugen-satzliste");
   const knieBeugenGesamt = document.getElementById("kniebeugen-gesamt");
+  const unterarmplankSekunden = document.getElementById("unterarmplank-sekunden");
+const unterarmplankBestaetigen = document.getElementById("unterarmplank-bestaetigen");
+const unterarmplankSatzliste = document.getElementById("unterarmplank-satzliste");
+const unterarmplankGesamt = document.getElementById("unterarmplank-gesamt");
+const unterarmplankSaetze = [];
 const liegestuetzeSaetze = [];
 const kniebeugenSaetze = [];
 const weitereUebungen = document.getElementById("weitere-uebungen");
@@ -150,8 +161,18 @@ liste.replaceChildren();
     return gesamtwert + wert;
   }, 0);
 
-  gesamt.textContent =
-  "Tagessumme " + uebung + ": " + summe + " " + einheitAnzeige;
+  let gesamtwertText = summe + " " + einheitAnzeige;
+
+if (einheitAnzeige === "Sekunden") {
+  const minuten = Math.floor(summe / 60);
+  const restSekunden = summe % 60;
+  gesamtwertText +=
+    " (" + minuten + ":" + String(restSekunden).padStart(2, "0") + " min)";
+}
+
+const satzWort = saetze.length === 1 ? "Satz" : "Sätze";
+gesamt.textContent =
+  uebung + ": " + saetze.length + " " + satzWort + " – " + gesamtwertText;
 }
   liegestuetzeBestaetigen.addEventListener("click", function () {
   const wert = Number(liegestuetzeWiederholungen.value);
@@ -174,7 +195,25 @@ kniebeugenBestaetigen.addEventListener("click", function () {
   saetzeAnzeigen(kniebeugenSaetze, knieBeugenSatzliste, knieBeugenGesamt, "Kniebeugen");
   knieBeugenWiederholungen.value = "";
 });
-uebungHinzufuegen.addEventListener("click", function () {
+unterarmplankBestaetigen.addEventListener("click", function () {
+  const wert = Number(unterarmplankSekunden.value);
+
+  if (!Number.isInteger(wert) || wert <= 0) {
+    alert("Bitte gib eine gültige Anzahl Sekunden ein.");
+    return;
+  }
+
+  unterarmplankSaetze.push(wert);
+  saetzeAnzeigen(
+    unterarmplankSaetze,
+    unterarmplankSatzliste,
+    unterarmplankGesamt,
+    "Unterarmplank",
+    "Sekunden"
+  );
+  unterarmplankSekunden.value = "";
+});
+  uebungHinzufuegen.addEventListener("click", function () {
 const block = document.createElement("div");
 block.className = "eigene-uebung";
 
